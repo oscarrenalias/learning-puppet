@@ -1,4 +1,5 @@
 # Same as ntp.pp but now we group all the NTP properties in a Puppet class
+# Should be linked/moved from ~/.puppet/modules/ntp/manifests or /etc/puppetlabs/puppet/modules
 class ntp {
 	package { "ntp":
 		ensure => present,
