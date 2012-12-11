@@ -42,3 +42,17 @@ class jboss($version = $title) {
 
 	File["/etc/init.d/jboss-$version"] -> Service["jboss-$version"]
 }
+
+# Non-parameterized class so that we can assign it to nodes
+class jboss::jboss_node {
+	if empty($jboss_version) == true {
+		fail("Please define variable jboss_version for the node")
+	}
+	else {  
+		include java::openjdk7
+		
+		class { 'jboss':
+			version => $jboss_version
+		}
+	}
+}
