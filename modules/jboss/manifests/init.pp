@@ -29,6 +29,14 @@ class jboss($version = $title) {
 		default: { fail("Only Ubuntu systems are currently supported") }
 	}
 
+	# and the standalone configuration file with our own settings
+	file { "/opt/jboss-as-$version/bin/standalone.conf":
+		source => "puppet:///modules/jboss/standalone.conf",
+		owner => jboss,		
+		mode => 0533,
+		require => File["/etc/init.d/jboss-$version"]
+	}
+
 	# set up the service startup file
 	file { "/etc/init.d/jboss-$version":
 		source => "puppet:///modules/jboss/$init_script",
