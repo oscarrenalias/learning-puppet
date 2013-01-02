@@ -33,7 +33,7 @@ class jboss($version = $title) {
 	file { "/opt/jboss-as-$version/bin/standalone.conf":
 		source => "puppet:///modules/jboss/standalone.conf",
 		owner => jboss,		
-		mode => 0533,
+		mode => 0644,
 		require => File["/etc/init.d/jboss-$version"]
 	}
 
