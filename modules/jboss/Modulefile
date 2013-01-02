@@ -1,0 +1,3 @@
+name 'orenalias-jboss-standalone'
+version '20130102'
+description 'Automatic installation and configuration of JBoss 7.x in standalone mode'
