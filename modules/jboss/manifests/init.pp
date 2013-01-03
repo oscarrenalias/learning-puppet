@@ -19,12 +19,19 @@ class jboss($version = $title, $adminUser, $adminPassword) {
 	# create the jboss system user
 	user { "jboss":
 		ensure => present,
+		groups => [ "jboss" ],
+		require => Group["jboss"]
+	}
+
+	group { "jboss":
+		ensure => present,
 		require => Common::Untar["jboss-untar-$version"]
 	}
 
 	# and fix the ownership of the folder in /opt
 	file { "/opt/jboss-as-$version":
 		owner => "jboss",
+		group => "jboss",
 		recurse => true,
 		require => User["jboss"]
 	}
@@ -38,7 +45,8 @@ class jboss($version = $title, $adminUser, $adminPassword) {
 	# and the standalone configuration file with our own settings
 	file { "/opt/jboss-as-$version/bin/standalone.conf":
 		content => template("jboss/standalone.conf.erb"),
-		owner => jboss,
+		owner => "jboss",
+		group => "jboss",
 		mode => 0644,
 		require => File["/etc/init.d/jboss-$version"]
 	}
@@ -60,11 +68,15 @@ class jboss($version = $title, $adminUser, $adminPassword) {
 		password => $adminPassword,
 		type => "management",
 		jbosspath => "/opt/jboss-as-$version",
-		require => File["/etc/init.d/jboss-$version"]
+		require => Service["jboss-$version"]
+	}
+
+	notify { "JBoss admin user created":
+		require => Jboss::Adduser["adduser-$adminUser"]
 	}
 
 
-	File["/etc/init.d/jboss-$version"] -> Service["jboss-$version"]
+	File["/opt/jboss-as-$version/bin/standalone.conf"] -> Service["jboss-$version"]
 }
 
 # Non-parameterized class so that we can assign it to nodes

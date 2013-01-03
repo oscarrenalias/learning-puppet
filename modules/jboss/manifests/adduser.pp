@@ -10,13 +10,12 @@ define jboss::adduser($name = $title, $password, $type, $jbosspath) {
 
 	# check what type of user must be created and then run the correct command
 	case $type {
-		"management": { $command = "add-user.sh $name $password" }
-		"application": { $command = "add-user.sh -a $name $password" }
+		"management": { $command = "add-user.sh --silent=true $name $password" }
+		"application": { $command = "add-user.sh --silent=true -a $name $password" }
 		default: { fail("User type must either be 'management' or 'application'") }
 	}
 
 	exec { "adduser-$name":
-		command => $command,
-		path => [ "$jbosspath/bin" ]
+		command => "$jbosspath/bin/$command"
 	}
 }
