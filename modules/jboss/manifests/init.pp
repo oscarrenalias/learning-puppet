@@ -21,7 +21,7 @@ class jboss($version = $title, $adminUser, $adminPassword) {
 	# create the jboss system user
 	user { "jboss":
 		ensure => present,
-		groups => [ "jboss" ],
+		gid => "jboss",
 		require => Group["jboss"]
 	}
 
