@@ -55,7 +55,7 @@ class jboss($version = $title, $adminUser, $adminPassword) {
 	}
 
 	# create the default admin user
-	jboss:adduser { "adduser-$adminUser":
+	jboss::adduser { "adduser-$adminUser":
 		user => $adminUser,
 		password => $adminPassword,
 		type => "management",
