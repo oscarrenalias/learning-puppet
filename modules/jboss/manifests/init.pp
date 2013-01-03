@@ -61,11 +61,15 @@ class jboss($version = $title, $adminUser, $adminPassword) {
 		group => "jboss",
 		mode => 0644,
 		require => File["init-script-$version"],
-		notify => Service["jboss-$version"]
+		notify => [Service["jboss-$version"], Jboss::Adduser["adduser-$adminUser"]]
 	}
 
 	service { "jboss-$version": 
-		ensure => running
+		ensure => running,
+		hasstatus => false,
+		hasrestart => true,
+		# TODO: this is kind of crude...
+		pattern => "java.*-server"
 	}
 
 	# create the default admin user
@@ -73,8 +77,7 @@ class jboss($version = $title, $adminUser, $adminPassword) {
 		name => $adminUser,
 		password => $adminPassword,
 		type => "management",
-		jbosspath => "/opt/jboss-as-$version",
-		subscribe => Service["jboss-$version"]
+		jbosspath => "/opt/jboss-as-$version"
 	}
 }
 
