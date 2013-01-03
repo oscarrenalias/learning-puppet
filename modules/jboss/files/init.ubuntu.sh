@@ -22,7 +22,6 @@ case "$1" in
 
         #updated:
         start-stop-daemon --start --quiet --background --chuid jboss --exec ${JBOSS_HOME}/bin/standalone.sh
-    ;;
     stop)
         echo "Stopping JBoss AS 7.1.1"
         #original:

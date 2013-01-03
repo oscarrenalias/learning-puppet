@@ -31,8 +31,8 @@ class jboss($version = $title) {
 
 	# and the standalone configuration file with our own settings
 	file { "/opt/jboss-as-$version/bin/standalone.conf":
-		source => "puppet:///modules/jboss/standalone.conf",
-		owner => jboss,		
+		content => template("jboss/standalone.conf.erb"),
+		owner => jboss,
 		mode => 0644,
 		require => File["/etc/init.d/jboss-$version"]
 	}
