@@ -1,4 +1,10 @@
-class jboss($version = $title) {
+#
+# Handles installations of standalone JBoss servers
+#
+# TODO:
+#   Support for domain installations
+#   Move the JBoss path to a variable so that we can reuse it
+class jboss($version = $title, $adminUser, $adminPassword) {
 	common::download { "jboss-$version-download":
 		url => "http://download.jboss.org/jbossas/7.1/jboss-as-$version/jboss-as-$version.tar.gz",
 		target => "/tmp/jboss-as-$version.tar.gz"
@@ -10,7 +16,7 @@ class jboss($version = $title) {
 		require => Common::Download["jboss-$version-download"]
 	}
 
-	# create the jboss user
+	# create the jboss system user
 	user { "jboss":
 		ensure => present,
 		require => Common::Untar["jboss-untar-$version"]
@@ -48,6 +54,16 @@ class jboss($version = $title) {
 		ensure => running
 	}
 
+	# create the default admin user
+	jboss:adduser { "adduser-$adminUser":
+		user => $adminUser,
+		password => $adminPassword,
+		type => "management",
+		jbosspath => "/opt/jboss-as-$version",
+		require => Service["jboss-$version"]
+	}
+
+
 	File["/etc/init.d/jboss-$version"] -> Service["jboss-$version"]
 }
 
@@ -60,7 +76,9 @@ class jboss::jboss_node {
 		include java::openjdk7
 		
 		class { 'jboss':
-			version => $jboss_version
+			version => $jboss_version,
+			adminUser => "admin",
+			adminPassword => "password"
 		}
 	}
 }

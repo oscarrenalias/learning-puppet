@@ -1,5 +1,5 @@
 # Function that adds users to JBoss
-define jboss::adduser($name = $title, $password, $jbosspath) {
+define jboss::adduser($name = $title, $password, $type, $jbosspath) {
 	if($password == "") {
 		fail("Empty passwords are not allowed")
 	}
