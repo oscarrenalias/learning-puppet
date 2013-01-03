@@ -60,7 +60,7 @@ class jboss($version = $title, $adminUser, $adminPassword) {
 		password => $adminPassword,
 		type => "management",
 		jbosspath => "/opt/jboss-as-$version",
-		require => Service["jboss-$version"]
+		require => File["/etc/init.d/jboss-$version"]
 	}
 
 
