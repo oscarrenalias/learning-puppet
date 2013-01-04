@@ -5,6 +5,7 @@ class solr::solr_master {
       else {
       	   class { 'solr::master':
 	   	 version => $solr_version,
+		 config => "simple",
 		 jbossroot => "/opt/jboss-as-$jboss_version"
 	  }	 
       }
