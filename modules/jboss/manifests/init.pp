@@ -64,7 +64,7 @@ class jboss($version = $title, $adminUser, $adminPassword) {
 		notify => [Service["jboss-$version"], Jboss::Adduser["adduser-$adminUser"]]
 	}
 
-	service { "jboss-$version": 
+	service { "jboss": 
 		ensure => running,
 		hasstatus => false,
 		hasrestart => true,
