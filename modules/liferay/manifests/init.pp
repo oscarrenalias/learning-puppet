@@ -1,16 +1,21 @@
 
 
 class liferay($instance_name = $title, $version, $mysqldriver, $jbosshome) {
-	package { "mysql-server":
-		ensure => installed
+
+	class { 'mysql::server': 
+		config_hash => { 'root_password' => 'password' }
 	}
 
-	service { "mysql":
-		ensure => running
+	mysql::db { "liferay":
+		user => "liferay",
+		password => "liferay",
+		host => "localhost",
+		grant => [ "all" ]
 	}
-
+		
 	$s3_server = "https://s3-eu-west-1.amazonaws.com"
 	$s3_repo = "$s3_server/pq-files/liferay/$version"
+	$mysqldrivername = "mysql-connector-java-$mysqldriver-bin.jar"
 
 	file { [ "$jbosshome/modules", "$jbosshome/modules/com", "$jbosshome/modules/com/liferay", 
 		 "$jbosshome/modules/com/liferay/portal/" ]:
@@ -66,15 +71,37 @@ class liferay($instance_name = $title, $version, $mysqldriver, $jbosshome) {
 #		replace => true,
 #	}
 
-	# deploy the WAR
+
+	# deploy the WAR as the root application, and explode it
 	jboss::deploy { "liferay-deploy-$version":
 		source => "/tmp/liferay-portal-$version.war",
 		target => "liferay-portal-$version.war",
 		jbossroot => $jbosshome,
+		asroot => true,
+		notify => File["remove-eclipselink"]
 	}
 
-	# we assume that JBoss is running in auto-deploy mode so the WAR will be deployed automatically
+	# Lifereay home
+	file { "/opt/liferay":
+		owner => "jboss",
+		group => "jboss",
+		ensure => "directory",
+		replace => false
+	}
 
+	# deploy our customized config file
+	file { "liferay-portal-ext":
+		path => "$jbosshome/standalone/deployments/ROOT.war/WEB-INF/classes/portal-ext.properties",
+		ensure => "present",
+		content => template("liferay/portal-ext.properties.erb"),
+		replace => true,
+	}
+
+	# remove eclipselink.jar as per the instructions
+	file { "remove-eclipselink":
+		path => "$jbosshome/standalone/deployments/ROOT.war/WEB-INF/lib/eclipselink.jar",
+		ensure => "absent",
+	}
 }
 
 class liferay::liferay_node {
