@@ -46,8 +46,8 @@ class jboss($version = $title, $adminUser, $adminPassword) {
 
 	# set up the service startup file
 	file { "init-script-$version":
-		path => "/etc/init.d/jboss-$version",
-		source => "puppet:///modules/jboss/$init_script",
+		path => "/etc/init.d/jboss",
+		source => "puppet:///modules/jboss/$version/$init_script",
 		require => Common::Untar["jboss-untar-$version"],
 		mode => 0777,
 		notify => Service["jboss-$version"]
