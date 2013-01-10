@@ -50,7 +50,7 @@ class jboss($version = $title, $adminUser, $adminPassword) {
 		source => "puppet:///modules/jboss/$version/$init_script",
 		require => Common::Untar["jboss-untar-$version"],
 		mode => 0777,
-		notify => Service["jboss-$version"]
+		notify => Service["jboss"]
 	}
 
 	# and the standalone configuration file with our own settings
@@ -61,7 +61,7 @@ class jboss($version = $title, $adminUser, $adminPassword) {
 		group => "jboss",
 		mode => 0644,
 		require => File["init-script-$version"],
-		notify => [Service["jboss-$version"], Jboss::Adduser["adduser-$adminUser"]]
+		notify => [Service["jboss"], Jboss::Adduser["adduser-$adminUser"]]
 	}
 
 	service { "jboss": 
