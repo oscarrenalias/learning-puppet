@@ -98,7 +98,7 @@ class liferay::liferay_node {
 	}
 
 	class { "liferay":
-		version => $liferay_version
+		version => $liferay_version,
 		mysqldriver => "5.1.22",
 		instance_name => "test-instance",
 		jbosshome => "/opt/jboss-as-7.1.1.Final",
