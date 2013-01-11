@@ -21,17 +21,10 @@ case "$1" in
     ;;
     stop)
         echo "Stopping RHQ Agent"
-        start-stop-daemon --start --quiet --background --chuid jboss --exec ${RHQ_AGENT_HOME}/bin/rhq-agent.sh --daemon --config=${RHQ_AGENT_HOME}/conf/agent-configuration.xml
-    ;;
-    restart)
-        echo "Stopping JON"
-        start-stop-daemon --start --quiet --background --chuid jboss --exec ${RHQ_AGENT_HOME}/bin/rhq-agent.sh --daemon --config=${RHQ_AGENT_HOME}/conf/agent-configuration.xml
-
-        echo "Starting JON"
-        start-stop-daemon --start --quiet --background --chuid jboss --exec ${RHQ_AGENT_HOME}/bin/rhq-agent.sh --daemon --config=${RHQ_AGENT_HOME}/conf/agent-configuration.xml
+	echo "Not supported yet"
     ;;
     *)
-        echo "Usage: service jon {start|stop|restart}"
+        echo "Usage: service jon {start|stop}"
         exit 1
     ;;
 esac
