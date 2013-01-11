@@ -17,18 +17,18 @@ export RHQ_AGENT_HOME="/opt/rhq-agent"
 case "$1" in
     start)
         echo "Starting RHQ Agent"
-        start-stop-daemon --start --quiet --background --chuid jboss --exec ${JON_HOME}/bin/rhq-agent.sh --daemon --config=${JON_HOME}/conf/agent-configuration.xml
+        start-stop-daemon --start --quiet --background --chuid jboss --exec ${RHQ_AGENT_HOME}/bin/rhq-agent.sh --daemon --config=${RHQ_AGENT_HOME}/conf/agent-configuration.xml
     ;;
     stop)
         echo "Stopping RHQ Agent"
-        start-stop-daemon --start --quiet --background --chuid jboss --exec ${JON_HOME}/bin/rhq-agent.sh --daemon --config=${JON_HOME}/conf/agent-configuration.xml
+        start-stop-daemon --start --quiet --background --chuid jboss --exec ${RHQ_AGENT_HOME}/bin/rhq-agent.sh --daemon --config=${RHQ_AGENT_HOME}/conf/agent-configuration.xml
     ;;
     restart)
         echo "Stopping JON"
-        start-stop-daemon --start --quiet --background --chuid jboss --exec ${JON_HOME}/bin/rhq-agent.sh --daemon --config=${JON_HOME}/conf/agent-configuration.xml
+        start-stop-daemon --start --quiet --background --chuid jboss --exec ${RHQ_AGENT_HOME}/bin/rhq-agent.sh --daemon --config=${RHQ_AGENT_HOME}/conf/agent-configuration.xml
 
         echo "Starting JON"
-        start-stop-daemon --start --quiet --background --chuid jboss --exec ${JON_HOME}/bin/rhq-agent.sh --daemon --config=${JON_HOME}/conf/agent-configuration.xml
+        start-stop-daemon --start --quiet --background --chuid jboss --exec ${RHQ_AGENT_HOME}/bin/rhq-agent.sh --daemon --config=${RHQ_AGENT_HOME}/conf/agent-configuration.xml
     ;;
     *)
         echo "Usage: service jon {start|stop|restart}"
