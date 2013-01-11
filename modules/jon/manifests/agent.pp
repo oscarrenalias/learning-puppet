@@ -36,7 +36,7 @@ class jon::agent($jonserver, $port = 7080) {
 
 	# startup script
 	file { "rhq-agent-startup":
-		path => "/etc/init.d/rhq-agent.sh",
+		path => "/etc/init.d/rhq-agent",
 		ensure => present,
 		source => "puppet:///modules/jon/agent/$init_script",
 		mode => 0777,
