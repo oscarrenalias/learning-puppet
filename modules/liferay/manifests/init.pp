@@ -37,13 +37,8 @@ class liferay($instance_name = $title, $version, $mysqldriver, $jbosshome) {
 		notify => Common::Untar["liferay-dependencies-untar-$version"],
 	}
 
-	# including the MySQL JDBC driver
-#	common::download { "mysql-connector-$mysqldriver":
-#		url => "$s3_server/mysql-connector-java/$version/mysql-connector-java-$version.jar",
-#		target => "$jbosshome/modules/com/liferay/portal/main",
-#	}
-		
-	# install the dependencies first - we can have tar to unpack them in the right place
+	# install the dependencies first - we can have tar to unpack them in the right place. It's a
+	# good idea if the dependencies package already includes the MySQL driver
 	common::untar { "liferay-dependencies-untar-$version":
 		source => "/tmp/liferay-portal-dependencies-$version.tar.gz",
 		target => "$jbosshome/modules/com/liferay/portal/main",
@@ -64,13 +59,6 @@ class liferay($instance_name = $title, $version, $mysqldriver, $jbosshome) {
 		ensure => present,
 		replace => true,
 	}
-#	file { "liferay-custom-standalone.conf":
-#		path => "$jbosshome/bin/standalone.conf",
-#		content => template("liferay/jboss-standalone.conf.erb"),
-#		ensure => present,
-#		replace => true,
-#	}
-
 
 	# deploy the WAR as the root application, and explode it
 	jboss::deploy { "liferay-deploy-$version":
@@ -110,7 +98,7 @@ class liferay::liferay_node {
 	}
 
 	class { "liferay":
-		version => "6.1.1-ce-ga2",
+		version => $liferay_version
 		mysqldriver => "5.1.22",
 		instance_name => "test-instance",
 		jbosshome => "/opt/jboss-as-7.1.1.Final",
