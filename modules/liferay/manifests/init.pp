@@ -13,8 +13,8 @@ class liferay(
 ) inherits liferay::params {
 
 	# Tell puppet that these dependencies should have been filled somewhere
-	Class["jboss"] -> Class["liferay"]
-	Class["mysql::server"] -> Class["liferay"]
+	#Class["jboss"] -> Class["liferay"]
+	#Class["mysql::server"] -> Class["liferay"]
 		
 	$s3_server = "https://s3-eu-west-1.amazonaws.com"
 	$s3_repo = "$s3_server/pq-files/liferay/$version"
@@ -80,13 +80,14 @@ class liferay(
 		ensure => "present",
 		content => template("liferay/portal-ext.properties.erb"),
 		replace => true,
-		require => Jboss::Deploy["liferay-deploy-$version"]
+		require => Jboss::Deploy["liferay-deploy-$version"],
 	}
 
 	# remove eclipselink.jar as per the instructions
 	file { "remove-eclipselink":
 		path => "$jbosshome/standalone/deployments/ROOT.war/WEB-INF/lib/eclipselink.jar",
 		ensure => "absent",
+		notify => Service["jboss"]
 	}
 }
 
