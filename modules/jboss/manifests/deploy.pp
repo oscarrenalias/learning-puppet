@@ -31,7 +31,7 @@ define jboss::deploy($source = $title, $target, $jbossroot, $asroot = false, $re
 	    		path => "$jbossroot/standalone/deployments/$target",
        		}
 		file { "jboss-deploy-$source-dodeploy":
-			path => "$jbossroot/stanalone/deployments/$target.dodeploy",
+			path => "$jbossroot/standalone/deployments/$target.dodeploy",
 			ensure => exists,
 			require => File["jboss-deploy-$source"],
 		}	
