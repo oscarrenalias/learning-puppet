@@ -1,10 +1,30 @@
 #
 # Handles installations of standalone JBoss servers
 #
+
+# Defines some sane defaults for the class
+class jboss::params {
+	$adminUser = "admin"
+	$adminPassword = "password"
+	$standaloneConf = template("jboss/standalone.conf.erb")
+	$standaloneXml = template("jboss/standalone.xml.erb")
+	$user = "jboss"
+	$group = "jboss"
+}	
+
 # TODO:
 #   Support for domain installations
 #   Move the JBoss path to a variable so that we can reuse it
-class jboss($version = $title, $adminUser, $adminPassword) {
+class jboss(
+	$version = $title, 
+	$adminUser = $jboss::params::adminUser, 
+	$adminPassword = $jboss::params::adminPassword,
+	$standaloneConf = $jboss::params::standaloneConf,
+	$standaloneXml = $jboss::params::standaloneXml,
+	$user = $jboss::params::user,
+	$group = $jboss::params::group
+) inherits jboss::params {
+
 	common::download { "jboss-$version-download":
 		url => "http://download.jboss.org/jbossas/7.1/jboss-as-$version/jboss-as-$version.tar.gz",
 		target => "/tmp/jboss-as-$version.tar.gz",
@@ -20,20 +40,22 @@ class jboss($version = $title, $adminUser, $adminPassword) {
 
 	# create the jboss system user
 	user { "jboss":
+		name => $user,
 		ensure => present,
-		gid => "jboss",
+		gid => $group,
 		require => Group["jboss"]
 	}
 
 	group { "jboss":
+		name => $group,
 		ensure => present
 	}
 
 	# and fix the ownership of the folder in /opt
 	file { "fix-ownership-$version":
 		path => "/opt/jboss-as-$version",
-		owner => "jboss",
-		group => "jboss",
+		owner => $user,
+		group => $group,
 		recurse => true,
 		require => User["jboss"]
 	}
@@ -53,15 +75,21 @@ class jboss($version = $title, $adminUser, $adminPassword) {
 		notify => Service["jboss"]
 	}
 
-	# and the standalone configuration file with our own settings
+	# and the standalone configuration files with our own settings
+	File { group => $group, owner => $user }
+
 	file { "standalone-config-$version":
 		path => "/opt/jboss-as-$version/bin/standalone.conf",
-		content => template("jboss/standalone.conf.erb"),
-		owner => "jboss",
-		group => "jboss",
-		mode => 0644,
+		content => $standaloneConf,
 		require => File["init-script-$version"],
+		mode => 0644,
 		notify => [Service["jboss"], Jboss::Adduser["adduser-$adminUser"]]
+	}
+	file { "standalone-xml-config":
+		path => "/opt/jboss-as-$version/standalone/configuration/standalone.xml",
+		content => $standaloneXml,
+		mode => 0644,
+		notify => Service["jboss"],
 	}
 
 	service { "jboss": 
@@ -91,8 +119,6 @@ class jboss::jboss_node {
 		
 		class { 'jboss':
 			version => $jboss_version,
-			adminUser => "admin",
-			adminPassword => "password"
 		}
 	}
 }
