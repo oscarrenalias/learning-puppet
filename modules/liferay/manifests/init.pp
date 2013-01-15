@@ -1,17 +1,20 @@
+class liferay::params {
+	$mysqldriver = ""
+	$jbosshome = "/opt/jboss-as-7.1.1.Final"
+	$liferayhome= "/opt/liferay"
+}
 
+class liferay(
+	$instance_name = $title, 
+	$version, 
+	$mysqldriver = $liferay::params::mysqldriver, 
+	$jbosshome = $liferay::params::jbosshome,
+	$liferayhome = $liferay::params::liferayhome
+) inherits liferay::params {
 
-class liferay($instance_name = $title, $version, $mysqldriver, $jbosshome) {
-
-	class { 'mysql::server': 
-		config_hash => { 'root_password' => 'password' }
-	}
-
-	mysql::db { "liferay":
-		user => "liferay",
-		password => "liferay",
-		host => "localhost",
-		grant => [ "all" ]
-	}
+	# Tell puppet that these dependencies should have been filled somewhere
+	Class["jboss"] -> Class["liferay"]
+	Class["mysql::server"] -> Class["liferay"]
 		
 	$s3_server = "https://s3-eu-west-1.amazonaws.com"
 	$s3_repo = "$s3_server/pq-files/liferay/$version"
@@ -53,13 +56,6 @@ class liferay($instance_name = $title, $version, $mysqldriver, $jbosshome) {
 		owner => "jboss",
 	}
 
-	# configuration files customized for Liferay
-	file { "$jbosshome/standalone/configuration/standalone.xml":
-		content => template("liferay/jboss-standalone.xml.erb"),
-		ensure => present,
-		replace => true,
-	}
-
 	# deploy the WAR as the root application, and explode it
 	jboss::deploy { "liferay-deploy-$version":
 		source => "/tmp/liferay-portal-$version.war",
@@ -69,8 +65,9 @@ class liferay($instance_name = $title, $version, $mysqldriver, $jbosshome) {
 		notify => File["remove-eclipselink"]
 	}
 
-	# Lifereay home
-	file { "/opt/liferay":
+	# Liferay home
+	file { "liferay-home":
+		path => $liferayhome,
 		owner => "jboss",
 		group => "jboss",
 		ensure => "directory",
@@ -83,6 +80,7 @@ class liferay($instance_name = $title, $version, $mysqldriver, $jbosshome) {
 		ensure => "present",
 		content => template("liferay/portal-ext.properties.erb"),
 		replace => true,
+		require => Jboss:Deploy["liferay-deploy-$version"]
 	}
 
 	# remove eclipselink.jar as per the instructions
@@ -95,6 +93,26 @@ class liferay($instance_name = $title, $version, $mysqldriver, $jbosshome) {
 class liferay::liferay_node {
 	if empty($liferay_version) == true {
 		fail("Please define node attribute liferay_version for this node or group")
+	}
+
+	# MySQL dependency
+	class { 'mysql::server': 
+		config_hash => { 'root_password' => 'password' }
+	}
+
+	mysql::db { "liferay":
+		user => "liferay",
+		password => "liferay",
+		host => "localhost",
+		grant => [ "all" ]
+	}
+
+	include java::openjdk7
+
+	# Jboss dependency
+	class { 'jboss':
+		version => "7.1.1.Final",
+		standaloneXml => template("liferay/jboss-standalone.xml.erb"),
 	}
 
 	class { "liferay":
