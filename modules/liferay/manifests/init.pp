@@ -80,7 +80,7 @@ class liferay(
 		ensure => "present",
 		content => template("liferay/portal-ext.properties.erb"),
 		replace => true,
-		require => Jboss:Deploy["liferay-deploy-$version"]
+		require => Jboss::Deploy["liferay-deploy-$version"]
 	}
 
 	# remove eclipselink.jar as per the instructions
