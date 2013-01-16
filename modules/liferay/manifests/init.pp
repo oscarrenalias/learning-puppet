@@ -36,7 +36,6 @@ class liferay(
 	common::download { "liferay-deps-download-$version":
 		url => "$s3_repo/liferay-portal-dependencies-$version.tar.gz",
 		target => "/tmp/liferay-portal-dependencies-$version.tar.gz",
-#		notify => [Common::Download["mysql-connector-$mysqldriver"], Common::Untar["liferay-dependencies-untar-$version"]],
 		notify => Common::Untar["liferay-dependencies-untar-$version"],
 	}
 
@@ -46,7 +45,7 @@ class liferay(
 		source => "/tmp/liferay-portal-dependencies-$version.tar.gz",
 		target => "$jbosshome/modules/com/liferay/portal/main",
 		ifNotExists => "$jbosshome/modules/com/liferay/portal/main/portal-service.jar",
-		notify => [File["liferay-jboss-module.xml"], Jboss::Deploy["liferay-deploy-$version"]],
+		notify => File["liferay-jboss-module.xml"],
 	}
 
 	file { "liferay-jboss-module.xml":
@@ -54,6 +53,7 @@ class liferay(
 		content => template("liferay/module.xml.erb"),
 		ensure => present,
 		owner => "jboss",
+		notify => Jboss::Deploy["liferay-deploy-$version"],
 	}
 
 	# deploy the WAR as the root application, and explode it
@@ -62,7 +62,6 @@ class liferay(
 		target => "liferay-portal-$version.war",
 		jbossroot => $jbosshome,
 		asroot => true,
-		notify => File["remove-eclipselink"]
 	}
 
 	# Liferay home
@@ -87,7 +86,7 @@ class liferay(
 	file { "remove-eclipselink":
 		path => "$jbosshome/standalone/deployments/ROOT.war/WEB-INF/lib/eclipselink.jar",
 		ensure => "absent",
-		notify => Service["jboss"]
+		require => Jboss::Deploy["liferay-deploy-$version"],
 	}
 }
 
@@ -108,15 +107,13 @@ class liferay::liferay_node {
 		grant => [ "all" ]
 	}
 
-	include java::openjdk7
+	require java::openjdk7
 
 	# Jboss dependency
 	class { 'jboss':
 		version => "7.1.1.Final",
 		standaloneXml => template("liferay/jboss-standalone.xml.erb"),
-	}
-
-	class { "liferay":
+	} -> class { "liferay":
 		version => $liferay_version,
 		mysqldriver => "5.1.22",
 		instance_name => "test-instance",
