@@ -15,7 +15,9 @@ define jboss::deploy($source = $title, $target, $jbossroot, $asroot = false, $re
 			source => $source,
 			target => "$jbossroot/standalone/deployments/ROOT.war",
 			ifNotExists => "$jbossroot/standalone/deployments/ROOT.war/WEB-INF",
-			notify => File["jboss-root-deployment-file"],		
+			notify => File["jboss-root-deployment-file"],
+			owner => "jboss",
+			group => "jboss",
 		}
 		
 		file { "jboss-root-deployment-file":
