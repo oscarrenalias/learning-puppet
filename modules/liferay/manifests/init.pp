@@ -39,6 +39,14 @@ class liferay(
 		notify => Common::Untar["liferay-dependencies-untar-$version"],
 	}
 
+	mysql::db { "liferay":
+               	user => "liferay",
+               	password => "liferay",
+               	host => "localhost",
+               	grant => [ "all" ],
+		require => Common::Untar["liferay-dependencies-untar-$version"],
+        }
+
 	# install the dependencies first - we can have tar to unpack them in the right place. It's a
 	# good idea if the dependencies package already includes the MySQL driver
 	common::untar { "liferay-dependencies-untar-$version":
@@ -97,15 +105,12 @@ class liferay::liferay_node {
 
 	# MySQL dependency
 	class { 'mysql::server': 
-		config_hash => { 'root_password' => 'password' }
+		config_hash => { 
+			'root_password' => 'password',
+			'etc_root_password' => true
+		},
 	}
 
-	mysql::db { "liferay":
-		user => "liferay",
-		password => "liferay",
-		host => "localhost",
-		grant => [ "all" ]
-	}
 
 	require java::openjdk7
 
