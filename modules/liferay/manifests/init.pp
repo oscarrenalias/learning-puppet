@@ -88,6 +88,7 @@ class liferay(
 		content => template("liferay/portal-ext.properties.erb"),
 		replace => true,
 		require => Jboss::Deploy["liferay-deploy-$version"],
+		owner => "jboss",
 	}
 
 	# remove eclipselink.jar as per the instructions
@@ -110,7 +111,6 @@ class liferay::liferay_node {
 			'etc_root_password' => true
 		},
 	}
-
 
 	require java::openjdk7
 
