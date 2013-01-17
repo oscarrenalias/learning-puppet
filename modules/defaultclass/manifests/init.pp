@@ -5,4 +5,8 @@ class defaultclass {
 	package { "git":
 		ensure => installed
 	}
+
+        package { "unzip":
+          ensure => installed
+        }
 }
