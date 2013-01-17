@@ -32,12 +32,4 @@ class liferay::solr(
     jbossroot => $jbosshome,
     timeout => 600,
   }
-
-  #liferay::solr::hotdeploy { "liferay-solr":
-  #  jbosshome => $jbosshome,
-  #  version => $version,
-  #  solrconfig => $solrconfig,
-  #  require => Jboss::Cli::Sysproperty_add["liferay-solr-property"],
-  #}
-
 }
