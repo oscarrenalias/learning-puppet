@@ -121,17 +121,26 @@ class liferay::liferay_node {
 	class { 'jboss':
 		version => "7.1.1.Final",
 		standaloneXml => template("liferay/jboss-standalone.xml.erb"),
-	} -> class { "liferay":
+	}
+
+        class { "liferay":
 		version => $liferay_version,
 		mysqldriver => "5.1.22",
 		instance_name => "test-instance",
 		jbosshome => "/opt/jboss-as-7.1.1.Final",
-	} -> class { "liferay::solr":
+                require => Class["jboss"],
+	}
+
+        class { "liferay::solr":
           version => $liferay_version,
           jbosshome => "/opt/jboss-as-7.1.1.Final",
           solrserver => "http://ec2-46-51-141-11.eu-west-1.compute.amazonaws.com:8080/solr",
-        } -> jboss::force_restart { "force-jboss-liferay-restart":
-          notify => Service["jboss"]
+          require => Class["liferay"],
+          notify => Jboss::Force_restart["force-jboss-liferay-restart"],
+        }
+
+        jboss::force_restart { "force-jboss-liferay-restart":
+          #notify => Service["jboss"],
         }
         # This last line is kind of brutal, but can't think of another way to tell JBoss that it should reload itself
         # so that it can load some new JAR files deployed as a module by the Liferay manifest...
