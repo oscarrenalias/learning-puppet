@@ -10,6 +10,7 @@ class jboss::params {
 	$standaloneXml = template("jboss/standalone.xml.erb")
 	$user = "jboss"
 	$group = "jboss"
+        $enableService = true
 }	
 
 # TODO:
@@ -22,11 +23,15 @@ class jboss(
 	$standaloneConf = $jboss::params::standaloneConf,
 	$standaloneXml = $jboss::params::standaloneXml,
 	$user = $jboss::params::user,
-	$group = $jboss::params::group
+	$group = $jboss::params::group,
+        $enableService = $jboss::params::enableService
 ) inherits jboss::params {
 
+        $jbosshome = "/opt/jboss-as-$version"
+
 	common::download { "jboss-$version-download":
-		url => "http://download.jboss.org/jbossas/7.1/jboss-as-$version/jboss-as-$version.tar.gz",
+		#url => "http://download.jboss.org/jbossas/7.1/jboss-as-$version/jboss-as-$version.tar.gz",
+                url => "https://s3-eu-west-1.amazonaws.com/pq-files/jboss-as/$version/jboss-as-$version.tar.gz",
 		target => "/tmp/jboss-as-$version.tar.gz",
 		notify => Common::Untar["jboss-untar-$version"]
 	}
@@ -34,7 +39,7 @@ class jboss(
 	common::untar { "jboss-untar-$version":
 		source => "/tmp/jboss-as-$version.tar.gz",
 		target => "/opt",
-		ifNotExists => "/opt/jboss-as-$version",
+		ifNotExists => "$jbosshome",
 		notify => File["fix-ownership-$version"]
 	}
 
@@ -53,7 +58,7 @@ class jboss(
 
 	# and fix the ownership of the folder in /opt
 	file { "fix-ownership-$version":
-		path => "/opt/jboss-as-$version",
+		path => "$jbosshome",
 		owner => $user,
 		group => $group,
 		recurse => true,
@@ -62,7 +67,16 @@ class jboss(
 
 	# copy the correct startup script
 	case $operatingsystem {
-		ubuntu: { $init_script = "init.ubuntu.sh" }
+		ubuntu: {
+                  $init_script = "init.ubuntu.sh"
+                  file { "jboss-ubuntu-defaults":
+                    path => "/etc/default/jboss-as",
+                    owner => $user,
+                    group => $group,
+                    content => template("jboss/$version/ubuntu-defaults-jboss-as.erb"),
+                    ensure => "present",
+                  }
+                }
 		default: { fail("Only Ubuntu systems are currently supported") }
 	}
 
@@ -79,25 +93,25 @@ class jboss(
 	File { group => $group, owner => $user }
 
 	file { "standalone-config-$version":
-		path => "/opt/jboss-as-$version/bin/standalone.conf",
+		path => "$jbosshome/bin/standalone.conf",
 		content => $standaloneConf,
 		require => File["init-script-$version"],
 		mode => 0644,
 		notify => [Service["jboss"], Jboss::Adduser["adduser-$adminUser"]]
 	}
 	file { "standalone-xml-config":
-		path => "/opt/jboss-as-$version/standalone/configuration/standalone.xml",
+		path => "$jbosshome/standalone/configuration/standalone.xml",
 		content => $standaloneXml,
 		mode => 0644,
 		notify => Service["jboss"],
 	}
 
-	service { "jboss": 
+	service { "jboss":
+                name => "jboss",
 		ensure => running,
-		hasstatus => false,
+		hasstatus => true,
 		hasrestart => true,
-		# TODO: this is kind of crude...
-		pattern => "java.*-server"
+                enable => true
 	}
 
 	# create the default admin user
@@ -105,7 +119,7 @@ class jboss(
 		name => $adminUser,
 		password => $adminPassword,
 		type => "management",
-		jbosspath => "/opt/jboss-as-$version"
+		jbosspath => "$jbosshome"
 	}
 }
 
