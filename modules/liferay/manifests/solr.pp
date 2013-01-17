@@ -29,7 +29,8 @@ class liferay::solr(
     password => "password",
     name => "liferay.solr.server",
     value => $solrserver,
-    jbossroot => $jbosshome,    
+    jbossroot => $jbosshome,
+    timeout => 600,
   }
 
   #liferay::solr::hotdeploy { "liferay-solr":
