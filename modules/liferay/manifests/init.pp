@@ -1,24 +1,18 @@
-class liferay::params {
-	$mysqldriver = ""
-	$jbosshome = "/opt/jboss-as-7.1.1.Final"
-	$liferayhome= "/opt/liferay"
-}
-
 class liferay(
 	$instance_name = $title, 
-	$version, 
+	$version = $liferay::params::version, 
 	$mysqldriver = $liferay::params::mysqldriver, 
 	$jbosshome = $liferay::params::jbosshome,
-	$liferayhome = $liferay::params::liferayhome
+	$liferayhome = $liferay::params::liferayhome,
 ) inherits liferay::params {
 
-	# Tell puppet that these dependencies should have been filled somewhere
-	#Class["jboss"] -> Class["liferay"]
-	#Class["mysql::server"] -> Class["liferay"]
-		
 	$s3_server = "https://s3-eu-west-1.amazonaws.com"
 	$s3_repo = "$s3_server/pq-files/liferay/$version"
 	$mysqldrivername = "mysql-connector-java-$mysqldriver-bin.jar"
+
+        if($version == 'UNDEF') {
+          fail("Liferay version number required")
+        }
 
 	file { [ "$jbosshome/modules", "$jbosshome/modules/com", "$jbosshome/modules/com/liferay", 
 		 "$jbosshome/modules/com/liferay/portal/" ]:
@@ -114,7 +108,7 @@ class liferay::liferay_node {
 
 	require java::openjdk7
 
-	# Jboss dependency
+	# Jboss dependency with Liferay as well as the Liferay solr-web plugin
 	class { 'jboss':
 		version => "7.1.1.Final",
 		standaloneXml => template("liferay/jboss-standalone.xml.erb"),
@@ -123,5 +117,9 @@ class liferay::liferay_node {
 		mysqldriver => "5.1.22",
 		instance_name => "test-instance",
 		jbosshome => "/opt/jboss-as-7.1.1.Final",
-	}
+	} -> class { "liferay::solr":
+          version => $liferay_version,
+          jbosshome => "/opt/jboss-as-7.1.1.Final",
+          solrserver => "http://ec2-46-51-141-11.eu-west-1.compute.amazonaws.com:8080/solr",
+        }
 }
