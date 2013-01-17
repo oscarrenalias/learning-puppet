@@ -68,12 +68,21 @@ class liferay(
 
 	# Liferay home
 	file { "liferay-home":
-		path => $liferayhome,
+		path => "$liferayhome",
 		owner => "jboss",
 		group => "jboss",
 		ensure => "directory",
 		replace => false
 	}
+
+        file { "liferay-home-deploy":
+          path => "$liferaydeploy",
+          owner => "jboss",
+          group => "jboss",
+          ensure => "directory",
+          replace => false,
+          require => File["liferay-home"],
+        }
 
 	# deploy our customized config file
 	file { "liferay-portal-ext":
