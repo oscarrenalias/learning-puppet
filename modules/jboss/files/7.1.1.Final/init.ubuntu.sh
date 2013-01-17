@@ -120,7 +120,9 @@ start() {
   mkdir -p $JBOSS_LOG_DIR
   # not sure: clear boot.log ... dunno if good, dunno if hardcoding boot.log good
   cat /dev/null > ${JBOSS_LOG_DIR}"/boot.log"
+  cp ${JBOSS_LOG_DIR}"/boot.log" ${JBOSS_LOG_DIR}"/boot.log.prev"
   # same as for boot.log, but we need to clear server.log to get proper launch detection (grepping later)
+  cp ${JBOSS_LOG_DIR}"/server.log" ${JBOSS_LOG_DIR}"/server.log.prev"
   cat /dev/null > ${JBOSS_LOG_DIR}"/server.log"
   chown -R ${JBOSS_USER}: $JBOSS_LOG_DIR
 
