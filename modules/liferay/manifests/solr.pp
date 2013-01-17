@@ -19,9 +19,10 @@ class liferay::solr(
 
   liferay::hotdeploy { "liferay-solr-hotdeploy":
     source => "/tmp/solr-web-$version.war",
-    package => "solr-web-$version.war",
+    package => "solr-web.war",
     liferayhome => "/opt/liferay",
     require => Jboss::Cli::Sysproperty_add["liferay-solr-property"],
+    jbosshome => $jbosshome,
   }
 
   jboss::cli::sysproperty_add { "liferay-solr-property":
