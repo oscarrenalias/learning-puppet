@@ -1,8 +1,4 @@
 define common::unzip($source = $title, $target, $ifNotExists, $owner = 'UNDEF', $group = 'UNDEF') {
-	package { "unzip":
-		ensure => installed,
-		notify => Exec["unzip-$source-$target"]
-	}
 
 	exec { "unzip-$source-$target":
 		command => "unzip $source -d $target",
@@ -10,10 +6,10 @@ define common::unzip($source = $title, $target, $ifNotExists, $owner = 'UNDEF', 
 		creates => $ifNotExists,
 	}
 
-	if(owner != 'UNDEF') or (group != 'UNDEF') {
-		if(owner != 'UNDEF') { $param = $owner }
-		if(group != 'UNDEF') { $param = ":$group" }
-		if(group != 'UNDEF') and (owner != 'UNDEF') { $param = "$owner:$group" }
+	if($owner != 'UNDEF') or ($group != 'UNDEF') {
+		if($owner != 'UNDEF') and ($group == 'UNDEF') { $param = $owner }
+		if($group != 'UNDEF') and ($owner == 'UNDEF') { $param = ":$group" }
+		if($group != 'UNDEF') and ($owner != 'UNDEF') { $param = "$owner:$group" }
 		
 		exec { "fix-target-permissions-$target":
 			command => "chown -R $param $target",
