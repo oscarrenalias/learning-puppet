@@ -15,6 +15,7 @@ define common::unzip($source = $title, $target, $ifNotExists, $owner = 'UNDEF', 
 			command => "chown -R $param $target",
 			path => [ "/bin/", "/usr/bin" ],
 			require => Exec["unzip-$source-$target"],
+                        creates => $ifNotExists,
 		}
 	}
 }
