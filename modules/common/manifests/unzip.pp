@@ -14,7 +14,7 @@ define common::unzip($source = $title, $target, $ifNotExists, $owner = 'UNDEF', 
 		exec { "fix-target-permissions-$target":
 			command => "chown -R $param $target",
 			path => [ "/bin/", "/usr/bin" ],
-			require => Exec["unzip-$source-$target"],
+			subscribe => Exec["unzip-$source-$target"],
 		}
 	}
 }
