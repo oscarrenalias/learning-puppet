@@ -93,44 +93,21 @@
         <subsystem xmlns="urn:jboss:domain:configadmin:1.0"/>
         <subsystem xmlns="urn:jboss:domain:datasources:1.0">
             <datasources>
-                <!-- datasource jndi-name="java:jboss/datasources/ExampleDS" pool-name="ExampleDS" enabled="true" use-java-context="true">
-                    <connection-url>jdbc:h2:mem:test;DB_CLOSE_DELAY=-1</connection-url>
-                    <driver>h2</driver>
+                <datasource jta="true" jndi-name="java:/jdbc/LiferayPool" pool-name="LiferayPool" enabled="true" use-java-context="true" use-ccm="true">
+                    <connection-url>jdbc:mysql://localhost/liferay</connection-url>
+                    <driver>mysql</driver>
                     <security>
-                        <user-name>sa</user-name>
-                        <password>sa</password>
+                        <user-name>liferay</user-name>
+                        <password>liferay</password>
                     </security>
                 </datasource>
                 <drivers>
-                    <driver name="h2" module="com.h2database.h2">
-                        <xa-datasource-class>org.h2.jdbcx.JdbcDataSource</xa-datasource-class>
-                    </driver>
+                    <driver name="mysql" module="com.liferay.portal"/>
                 </drivers>
-            </datasources -->
-	    <!-- Added for Liferay -->
-	    <datasource jndi-name="java:/jdbc/LiferayPool" pool-name="LiferayPool" enabled="true" jta="true" use-java-context="true" use-ccm="true">
-		<connection-url>jdbc:mysql://localhost/liferay</connection-url>
-		<driver>mysql</driver>
-		<security>
-			<user-name>liferay</user-name>
-			<password>liferay</password>
-		</security>
-	    </datasource>
-	    <drivers>
-		<driver name="mysql" module="com.liferay.portal"/>
-	    </drivers>
-	    <!-- end of changes for Liferay -->
-           </datasources>
+            </datasources>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:deployment-scanner:1.1">
-            <!-- modified for Liferay -->
-            <deployment-scanner 
-		path="deployments" 
-		relative-to="jboss.server.base.dir" 
-		scan-interval="5000" 
-		deployment-timeout="600"
-		auto-deploy-zipped="false"
-		auto-deploy-exploded="false" />
+            <deployment-scanner path="deployments" relative-to="jboss.server.base.dir" scan-interval="5000" auto-deploy-zipped="false" auto-deploy-exploded="false" deployment-timeout="600"/>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:ee:1.0"/>
         <subsystem xmlns="urn:jboss:domain:ejb3:1.2">
@@ -264,11 +241,10 @@
                         <policy-module code="Delegating" flag="required"/>
                     </authorization>
                 </security-domain>
-                <!-- added for Liferay -->
                 <security-domain name="PortalRealm">
                     <authentication>
-                        <login-module code="com.liferay.portal.security.jaas.PortalLoginModule" flag="required"/> 
-                    </authentication> 
+                        <login-module code="com.liferay.portal.security.jaas.PortalLoginModule" flag="required"/>
+                    </authentication>
                 </security-domain>
             </security-domains>
         </subsystem>
@@ -283,14 +259,14 @@
             <coordinator-environment default-timeout="300"/>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:web:1.1" default-virtual-server="default-host" native="false">
-            <connector name="http" protocol="HTTP/1.1" scheme="http" socket-binding="http"/>            
+            <configuration>
+                <jsp-configuration development="true"/>
+            </configuration>
+            <connector name="http" protocol="HTTP/1.1" scheme="http" socket-binding="http"/>
             <virtual-server name="default-host" enable-welcome-root="false">
                 <alias name="localhost"/>
                 <alias name="example.com"/>
             </virtual-server>
-            <configuration>
-                <jsp-configuration development="true" />
-            </configuration>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:webservices:1.1">
             <modify-wsdl-address>true</modify-wsdl-address>
@@ -334,4 +310,3 @@
     </socket-binding-group>
 
 </server>
-
