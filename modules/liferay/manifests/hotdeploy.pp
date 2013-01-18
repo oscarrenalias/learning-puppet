@@ -23,5 +23,6 @@ define liferay::hotdeploy(
   exec { "fix-hotdeploy-permissions":
     command => "chown jboss:jboss $liferayhome/deploy/$package",
     path => ["/bin", "/usr/bin"],
+    onlyif => "test -f $liferayhome/deploy/$package",
   }
 }
