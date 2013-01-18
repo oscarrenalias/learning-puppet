@@ -117,6 +117,9 @@ class liferay::liferay_node {
 
 	require java::openjdk7
 
+        $solrserver = "http://ec2-46-51-141-11.eu-west-1.compute.amazonaws.com:8080/solr"
+        $jbosshome = "/opt/jboss-as-7.1.1.Final"
+
 	# Jboss dependency with Liferay as well as the Liferay solr-web plugin
 	class { 'jboss':
 		version => "7.1.1.Final",
@@ -127,14 +130,13 @@ class liferay::liferay_node {
 		version => $liferay_version,
 		mysqldriver => "5.1.22",
 		instance_name => "test-instance",
-		jbosshome => "/opt/jboss-as-7.1.1.Final",
+		jbosshome => $jbosshome,
                 require => Class["jboss"],
 	}
 
         class { "liferay::solr":
           version => $liferay_version,
-          jbosshome => "/opt/jboss-as-7.1.1.Final",
-          solrserver => "http://ec2-46-51-141-11.eu-west-1.compute.amazonaws.com:8080/solr",
+          jbosshome => $jbosshome,
           require => Class["liferay"],
           notify => Jboss::Force_restart["force-jboss-liferay-restart"],
         }
